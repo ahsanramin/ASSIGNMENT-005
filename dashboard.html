@@ -48,3 +48,22 @@
       <button class="tab px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-status="all">All</button>
       <button class="tab px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-status="open">Open</button>
       <button class="tab px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-status="closed">Closed</button>
+      </div>
+    <div id="spinner" class="hidden flex justify-center my-8">
+      <div class="spinner w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
+      </div>
+    </div>
+    <div id="cardsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+  </main>
+  <div id="modal" class="hidden fixed inset-0 modal flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+      <div class="flex justify-end">
+        <button class="close-btn text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+  <script src="script/dashboard.js"></script>
+</body>
+
+</html>
