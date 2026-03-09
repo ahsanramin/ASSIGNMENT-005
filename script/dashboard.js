@@ -98,3 +98,64 @@ async function performSearch() {
   }
   showSpinner();
   try {
+    const res = await fetch(`${API_BASE}/issues/search?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    if (data.status === 'success') {
+      displayIssues(data.data);
+      issueCountSpan.textContent = `${data.data.length} Issues`;
+    } else {
+      displayIssues([]);
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    hideSpinner();
+  }
+}
+searchBtn.addEventListener('click', performSearch);
+searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') performSearch(); });
+async function openIssueModal(issueId) {
+  modal.classList.remove('hidden');
+  modalBody.innerHTML = '<div class="flex justify-center"><div class="spinner w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>';
+  try {
+    const res = await fetch(`${API_BASE}/issue/${issueId}`);
+    const data = await res.json();
+    if (data.status === 'success') {
+      const issue = data.data;
+      const created = new Date(issue.createdAt).toLocaleString();
+      const labelsHtml = issue.labels.map(l => `<span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded">${l}</span>`).join('');
+
+      let priorityTextClass = '';
+      if (issue.priority === 'high') priorityTextClass = 'text-red-600';
+      else if (issue.priority === 'medium') priorityTextClass = 'text-yellow-600';
+      else if (issue.priority === 'low') priorityTextClass = 'text-green-600';
+
+      modalBody.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">${issue.title}</h2>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="capitalize px-2 py-1 rounded-full text-xs ${issue.status === 'open' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'}">${issue.status}</span>
+                    <span class="text-sm text-gray-600">Opened by ${issue.author} · ${created}</span>
+                </div>
+                <div class="flex flex-wrap gap-1 mb-4">${labelsHtml}</div>
+                <p class="text-gray-700 mb-4">${issue.description}</p>
+                <div class="border-t border-gray-200 pt-4">
+                    <p class="text-sm"><span class="font-medium text-gray-700">Assignee:</span> <span class="text-gray-600">${issue.assignee || 'Unassigned'}</span></p>
+                    <p class="text-sm"><span class="font-medium text-gray-700">Priority:</span> <span class="capitalize ${priorityTextClass}">${issue.priority}</span></p>
+                </div>
+            `;
+    } else {
+      modalBody.innerHTML = '<p class="text-red-500">Failed to load issue details.</p>';
+    }
+  } catch (error) {
+    modalBody.innerHTML = '<p class="text-red-500">Error loading issue details.</p>';
+  }
+}
+closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+window.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('isAuthenticated')) {
+    window.location.href = 'index.html';
+    return;
+  }
+  fetchAllIssues();
+});
